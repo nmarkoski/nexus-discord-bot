@@ -3,9 +3,10 @@ import * as chrono from 'chrono-node';
 import { MessageFlags, time, TimestampStyles } from 'discord.js';
 import { eq } from 'drizzle-orm';
 
+import { buildDeleteButtons } from '@/components/reminder.js';
+
 import { db } from '../db/index.js';
 import { reminders } from '../db/schema.js';
-import { buildDeleteButtons } from '../utils/reminderButtons.js';
 
 export class ReminderCommand extends Command {
   constructor(context: Command.LoaderContext, options: Command.Options) {
