@@ -6,8 +6,7 @@ import {
   PermissionFlagsBits,
 } from 'discord.js';
 
-const MAX_BULK_DELETE = 100;
-const MIN_BULK_DELETE = 1;
+import { MAX_BULK_DELETE, MIN_BULK_DELETE } from '@/constants/purge.js';
 
 export class PurgeCommand extends Command {
   constructor(context: Command.LoaderContext, options: Command.Options) {
