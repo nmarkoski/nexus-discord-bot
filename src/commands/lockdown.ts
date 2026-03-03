@@ -54,9 +54,7 @@ export class LockdownCommand extends Subcommand {
     });
   }
 
-  public async chatInputActivate(
-    interaction: Subcommand.ChatInputCommandInteraction,
-  ) {
+  async chatInputActivate(interaction: Subcommand.ChatInputCommandInteraction) {
     const { guild, user } = interaction;
 
     if (guild === null) {
@@ -235,7 +233,7 @@ export class LockdownCommand extends Subcommand {
     });
   }
 
-  public async chatInputDeactivate(
+  async chatInputDeactivate(
     interaction: Subcommand.ChatInputCommandInteraction,
   ) {
     const { guild, user } = interaction;
@@ -342,9 +340,7 @@ export class LockdownCommand extends Subcommand {
     });
   }
 
-  public async chatInputStatus(
-    interaction: Subcommand.ChatInputCommandInteraction,
-  ) {
+  async chatInputStatus(interaction: Subcommand.ChatInputCommandInteraction) {
     const { guild } = interaction;
 
     if (guild === null) {
