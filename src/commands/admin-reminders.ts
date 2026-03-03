@@ -1,11 +1,14 @@
-import { Command } from '@sapphire/framework';
+import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import {
+  DiscordAPIError,
+  InteractionContextType,
   MessageFlags,
   PermissionFlagsBits,
+  RESTJSONErrorCodes,
   time,
   TimestampStyles,
 } from 'discord.js';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 import { db } from '../db/index.js';
 import { reminders } from '../db/schema.js';
@@ -17,18 +20,49 @@ export class AdminRemindersCommand extends Command {
       description: 'View reminders for any user (admin only)',
       name: 'admin-reminders',
       requiredUserPermissions: [PermissionFlagsBits.Administrator],
+      runIn: [CommandOptionsRunTypeEnum.GuildAny],
     });
   }
 
   override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction,
   ) {
-    const user = interaction.options.getUser('user', true);
+    const { guild, options } = interaction;
+
+    if (guild === null) {
+      return;
+    }
+
+    const user = options.getUser('user', true);
+
+    const guildMember = await guild.members
+      .fetch(user.id)
+      .catch((error: unknown) => {
+        if (
+          error instanceof DiscordAPIError &&
+          error.code === RESTJSONErrorCodes.UnknownMember
+        ) {
+          return null;
+        }
+
+        throw error;
+      });
+
+    if (guildMember === null) {
+      await interaction.reply({
+        content: `❌ That user is not a member of this server.`,
+        flags: [MessageFlags.Ephemeral],
+      });
+
+      return;
+    }
 
     const userReminders = await db
       .select()
       .from(reminders)
-      .where(eq(reminders.userId, user.id))
+      .where(
+        and(eq(reminders.userId, user.id), eq(reminders.guildId, guild.id)),
+      )
       .orderBy(reminders.remindAt);
 
     if (userReminders.length === 0) {
@@ -59,6 +93,7 @@ export class AdminRemindersCommand extends Command {
         .setName(this.name)
         .setDescription(this.description)
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .setContexts(InteractionContextType.Guild)
         .addUserOption((option) =>
           option
             .setName('user')

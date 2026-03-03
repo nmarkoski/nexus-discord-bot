@@ -1,4 +1,4 @@
-import { Command } from '@sapphire/framework';
+import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import {
   InteractionContextType,
   MessageFlags,
@@ -13,6 +13,9 @@ export class TimeoutCommand extends Command {
       ...options,
       description: 'Timeout yourself for a specified duration',
       name: 'timeout',
+      requiredClientPermissions: [PermissionFlagsBits.ModerateMembers],
+      requiredUserPermissions: [PermissionFlagsBits.SendMessages],
+      runIn: [CommandOptionsRunTypeEnum.GuildAny],
     });
   }
 
@@ -20,10 +23,6 @@ export class TimeoutCommand extends Command {
     interaction: Command.ChatInputCommandInteraction,
   ) {
     if (!interaction.inCachedGuild()) {
-      await interaction.reply({
-        content: '❌ This command can only be used in a server.',
-        flags: [MessageFlags.Ephemeral],
-      });
       return;
     }
 

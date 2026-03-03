@@ -1,4 +1,4 @@
-import { Command } from '@sapphire/framework';
+import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import {
   type ChatInputCommandInteraction,
   InteractionContextType,
@@ -14,6 +14,9 @@ export class PurgeCommand extends Command {
       ...options,
       description: 'Bulk delete messages from the channel',
       name: 'purge',
+      requiredClientPermissions: [PermissionFlagsBits.ManageMessages],
+      requiredUserPermissions: [PermissionFlagsBits.ManageMessages],
+      runIn: [CommandOptionsRunTypeEnum.GuildAny],
     });
   }
 

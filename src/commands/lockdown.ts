@@ -1,3 +1,4 @@
+import { CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import { Subcommand } from '@sapphire/plugin-subcommands';
 import {
   type ButtonInteraction,
@@ -33,10 +34,11 @@ export class LockdownCommand extends Subcommand {
   constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
     super(context, {
       ...options,
+      description: 'Lockdown command',
       name: 'lockdown',
       requiredClientPermissions: [PermissionFlagsBits.Administrator],
       requiredUserPermissions: [PermissionFlagsBits.Administrator],
-      runIn: ['GUILD_TEXT'],
+      runIn: [CommandOptionsRunTypeEnum.GuildAny],
       subcommands: [
         {
           chatInputRun: 'chatInputActivate',
@@ -371,7 +373,9 @@ export class LockdownCommand extends Subcommand {
     registry.registerChatInputCommand((builder) =>
       builder
         .setName(this.name)
-        .setDescription('Lockdown command')
+        .setDescription(this.description)
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+        .setContexts(InteractionContextType.Guild)
         .addSubcommand((command) =>
           command
             .setName('activate')
@@ -388,9 +392,7 @@ export class LockdownCommand extends Subcommand {
             .setDescription(
               'Check the current lockdown status for this server',
             ),
-        )
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-        .setContexts(InteractionContextType.Guild),
+        ),
     );
   }
 

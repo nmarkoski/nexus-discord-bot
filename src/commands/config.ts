@@ -1,5 +1,11 @@
+import { CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import { Subcommand } from '@sapphire/plugin-subcommands';
-import { ChannelType, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import {
+  ChannelType,
+  InteractionContextType,
+  MessageFlags,
+  PermissionFlagsBits,
+} from 'discord.js';
 import { eq } from 'drizzle-orm';
 
 import { db } from '../db/index.js';
@@ -11,6 +17,8 @@ export class ConfigCommand extends Subcommand {
       ...options,
       description: 'Configure server settings',
       name: 'config',
+      requiredUserPermissions: [PermissionFlagsBits.ManageGuild],
+      runIn: [CommandOptionsRunTypeEnum.GuildAny],
       subcommands: [
         {
           entries: [
@@ -133,6 +141,7 @@ export class ConfigCommand extends Subcommand {
         .setName(this.name)
         .setDescription(this.description)
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+        .setContexts(InteractionContextType.Guild)
         .addSubcommandGroup((group) =>
           group
             .setName('starboard')
