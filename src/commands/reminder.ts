@@ -1,80 +1,37 @@
-import { Command } from '@sapphire/framework';
+import { Subcommand } from '@sapphire/plugin-subcommands';
 import * as chrono from 'chrono-node';
 import { MessageFlags, time, TimestampStyles } from 'discord.js';
 import { eq } from 'drizzle-orm';
 
+import { buildDeleteButtons } from '@/components/reminder.js';
+
 import { db } from '../db/index.js';
 import { reminders } from '../db/schema.js';
-import { buildDeleteButtons } from '../utils/reminderButtons.js';
 
-export class ReminderCommand extends Command {
-  constructor(context: Command.LoaderContext, options: Command.Options) {
+export class ReminderCommand extends Subcommand {
+  constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
     super(context, {
       ...options,
       description: 'Manage reminders',
       name: 'reminder',
+      subcommands: [
+        {
+          chatInputRun: 'chatInputCreate',
+          name: 'create',
+        },
+        {
+          chatInputRun: 'chatInputList',
+          name: 'list',
+        },
+        {
+          chatInputRun: 'chatInputDelete',
+          name: 'delete',
+        },
+      ],
     });
   }
 
-  override async chatInputRun(
-    interaction: Command.ChatInputCommandInteraction,
-  ) {
-    const subcommand = interaction.options.getSubcommand();
-
-    switch (subcommand) {
-      case 'create':
-        await this.handleCreate(interaction);
-        break;
-      case 'delete':
-        await this.handleDelete(interaction);
-        break;
-      case 'list':
-        await this.handleList(interaction);
-        break;
-      default:
-        await interaction.reply({
-          content: '❌ Unknown subcommand.',
-          flags: [MessageFlags.Ephemeral],
-        });
-    }
-  }
-
-  override registerApplicationCommands(registry: Command.Registry) {
-    registry.registerChatInputCommand((builder) =>
-      builder
-        .setName(this.name)
-        .setDescription(this.description)
-        .addSubcommand((subcommand) =>
-          subcommand
-            .setName('create')
-            .setDescription('Create a new reminder')
-            .addStringOption((option) =>
-              option
-                .setName('message')
-                .setDescription('What to remind you about')
-                .setRequired(true),
-            )
-            .addStringOption((option) =>
-              option
-                .setName('when')
-                .setDescription(
-                  'When to remind you (e.g., "in 2 hours", "tomorrow at 3pm", "next monday")',
-                )
-                .setRequired(true),
-            ),
-        )
-        .addSubcommand((subcommand) =>
-          subcommand
-            .setName('list')
-            .setDescription('List your active reminders'),
-        )
-        .addSubcommand((subcommand) =>
-          subcommand.setName('delete').setDescription('Delete your reminders'),
-        ),
-    );
-  }
-
-  private async handleCreate(interaction: Command.ChatInputCommandInteraction) {
+  async chatInputCreate(interaction: Subcommand.ChatInputCommandInteraction) {
     const message = interaction.options.getString('message', true);
     const when = interaction.options.getString('when', true);
 
@@ -115,7 +72,7 @@ export class ReminderCommand extends Command {
     });
   }
 
-  private async handleDelete(interaction: Command.ChatInputCommandInteraction) {
+  async chatInputDelete(interaction: Subcommand.ChatInputCommandInteraction) {
     const userReminders = await db
       .select()
       .from(reminders)
@@ -137,7 +94,7 @@ export class ReminderCommand extends Command {
     });
   }
 
-  private async handleList(interaction: Command.ChatInputCommandInteraction) {
+  async chatInputList(interaction: Subcommand.ChatInputCommandInteraction) {
     const userReminders = await db
       .select()
       .from(reminders)
@@ -163,5 +120,40 @@ export class ReminderCommand extends Command {
       content: `📋 **Your Reminders** (${userReminders.length})\n\n${reminderList}`,
       flags: [MessageFlags.Ephemeral],
     });
+  }
+
+  override registerApplicationCommands(registry: Subcommand.Registry) {
+    registry.registerChatInputCommand((builder) =>
+      builder
+        .setName(this.name)
+        .setDescription(this.description)
+        .addSubcommand((subcommand) =>
+          subcommand
+            .setName('create')
+            .setDescription('Create a new reminder')
+            .addStringOption((option) =>
+              option
+                .setName('message')
+                .setDescription('What to remind you about')
+                .setRequired(true),
+            )
+            .addStringOption((option) =>
+              option
+                .setName('when')
+                .setDescription(
+                  'When to remind you (e.g., "in 2 hours", "tomorrow at 3pm", "next monday")',
+                )
+                .setRequired(true),
+            ),
+        )
+        .addSubcommand((subcommand) =>
+          subcommand
+            .setName('list')
+            .setDescription('List your active reminders'),
+        )
+        .addSubcommand((subcommand) =>
+          subcommand.setName('delete').setDescription('Delete your reminders'),
+        ),
+    );
   }
 }

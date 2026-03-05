@@ -1,4 +1,9 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import {
+  integer,
+  primaryKey,
+  sqliteTable,
+  text,
+} from 'drizzle-orm/sqlite-core';
 
 export const reminders = sqliteTable('reminders', {
   channelId: text('channel_id').notNull(),
@@ -44,3 +49,50 @@ export const starboardMessages = sqliteTable('starboard_messages', {
 
 export type NewStarboardMessage = typeof starboardMessages.$inferInsert;
 export type StarboardMessage = typeof starboardMessages.$inferSelect;
+
+export const lockdownSessions = sqliteTable('lockdown_sessions', {
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  excludedCategories: text('excluded_categories', { mode: 'json' })
+    .notNull()
+    .$type<string[]>()
+    .$defaultFn(() => []),
+  excludedChannels: text('excluded_channels', { mode: 'json' })
+    .notNull()
+    .$type<string[]>()
+    .$defaultFn(() => []),
+  excludedRoles: text('excluded_roles', { mode: 'json' })
+    .notNull()
+    .$type<string[]>()
+    .$defaultFn(() => []),
+  guildId: text('guild_id').notNull().primaryKey(),
+  reason: text('reason'),
+  type: text('type').notNull(),
+  userId: text('user_id').notNull(),
+});
+
+export type LockdownSession = typeof lockdownSessions.$inferSelect;
+export type NewLockdownSession = typeof lockdownSessions.$inferInsert;
+
+export const lockdownOverwrites = sqliteTable(
+  'lockdown_overwrites',
+  {
+    allow: text('allow').notNull(),
+    channelId: text('channel_id').notNull(),
+    deny: text('deny').notNull(),
+    guildId: text('guild_id')
+      .notNull()
+      .references(() => lockdownSessions.guildId, { onDelete: 'cascade' }),
+    overwriteId: text('overwrite_id').notNull(),
+    overwriteType: integer('overwrite_type').notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.guildId, table.channelId, table.overwriteId],
+    }),
+  ],
+);
+
+export type LockdownOverwrite = typeof lockdownOverwrites.$inferSelect;
+export type NewLockdownOverwrite = typeof lockdownOverwrites.$inferInsert;

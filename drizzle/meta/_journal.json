@@ -15,6 +15,13 @@
       "when": 1770155519756,
       "tag": "0001_happy_bloodstorm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1771737393716,
+      "tag": "0002_early_kate_bishop",
+      "breakpoints": true
     }
   ]
 }

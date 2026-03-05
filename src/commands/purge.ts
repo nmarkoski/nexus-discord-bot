@@ -1,4 +1,4 @@
-import { Command } from '@sapphire/framework';
+import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import {
   type ChatInputCommandInteraction,
   InteractionContextType,
@@ -6,8 +6,7 @@ import {
   PermissionFlagsBits,
 } from 'discord.js';
 
-const MAX_BULK_DELETE = 100;
-const MIN_BULK_DELETE = 1;
+import { MAX_BULK_DELETE, MIN_BULK_DELETE } from '@/constants/purge.js';
 
 export class PurgeCommand extends Command {
   constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -15,6 +14,9 @@ export class PurgeCommand extends Command {
       ...options,
       description: 'Bulk delete messages from the channel',
       name: 'purge',
+      requiredClientPermissions: [PermissionFlagsBits.ManageMessages],
+      requiredUserPermissions: [PermissionFlagsBits.ManageMessages],
+      runIn: [CommandOptionsRunTypeEnum.GuildAny],
     });
   }
 

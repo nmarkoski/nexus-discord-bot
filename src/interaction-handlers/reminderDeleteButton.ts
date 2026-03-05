@@ -6,9 +6,10 @@ import {
 } from '@sapphire/framework';
 import { and, eq } from 'drizzle-orm';
 
+import { buildDeleteButtons } from '@/components/reminder.js';
+
 import { db } from '../db/index.js';
 import { reminders } from '../db/schema.js';
-import { buildDeleteButtons } from '../utils/reminderButtons.js';
 
 export class ReminderDeleteButtonHandler extends InteractionHandler {
   constructor(

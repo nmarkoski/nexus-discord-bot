@@ -1,11 +1,10 @@
-import { Command } from '@sapphire/framework';
+import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import {
   ChannelType,
   type ChatInputCommandInteraction,
   type Guild,
   GuildPremiumTier,
   InteractionContextType,
-  MessageFlags,
   PermissionFlagsBits,
   time,
   TimestampStyles,
@@ -94,17 +93,15 @@ export class StatisticsCommand extends Command {
       ...options,
       description: 'View server statistics',
       name: 'statistics',
+      requiredUserPermissions: [PermissionFlagsBits.SendMessages],
+      runIn: [CommandOptionsRunTypeEnum.GuildAny],
     });
   }
 
   override async chatInputRun(interaction: ChatInputCommandInteraction) {
     const { guild } = interaction;
 
-    if (!guild) {
-      await interaction.reply({
-        content: '❌ This command can only be used in a server.',
-        flags: [MessageFlags.Ephemeral],
-      });
+    if (guild === null) {
       return;
     }
 

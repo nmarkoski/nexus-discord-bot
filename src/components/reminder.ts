@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 
-import type { Reminder } from '../db/schema.js';
+import type { Reminder } from '@/db/schema.js';
 
 export const buildDeleteButtons = (reminderList: Reminder[]) => {
   const rows: Array<ActionRowBuilder<ButtonBuilder>> = [];
